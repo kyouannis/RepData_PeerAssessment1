@@ -5,14 +5,33 @@ output:
     keep_md: true
 ---
 
-```{r setoptions, echo = FALSE}
-knitr::opts_chunk$set(echo = TRUE, messgae = FALSE, warning = FALSE)
-```
+
 
 ## Loading and preprocessing the data
 
-```{r read_data}
+
+```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(ggplot2)
 
 setwd("/Users/kyouannis/Documents/GitHub/RepData_PeerAssessment1")
@@ -24,7 +43,8 @@ activity<- read.csv("./activity.csv")
 
 ## What is mean total number of steps taken per day?
 
-```{r summary}
+
+```r
 dailysummary <- activity %>% 
   group_by(date) %>%
   summarise(total = sum(steps, na.rm = TRUE))
@@ -36,19 +56,27 @@ mediansteps<- median(dailysummary$total)
 
 Histogram of the total number of steps taken each day:
 
-```{r historgram1}
+
+```r
 ggplot(dailysummary, aes(total)) +
   geom_histogram() +
   labs(x = "Total Daily Number of Steps", title = "Histogram of Daily Total Steps")
 ```
 
-Mean total number of steps taken each day: __`r meansteps`__
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
 
-Median total number of steps taken each day: __`r mediansteps`__
+![](PA1_template_files/figure-html/historgram1-1.png)<!-- -->
+
+Mean total number of steps taken each day: __9354.2295082__
+
+Median total number of steps taken each day: __10395__
 
 ## What is the average daily activity pattern?
 
-``` {r timeseries}
+
+```r
 timeseries<- activity %>%
   group_by(interval) %>%
   summarise(mean = mean(steps, na.rm = TRUE))
@@ -61,28 +89,34 @@ maxinterval <- timeseries %>%
 
 Average number of steps taken by interval:
 
-``` {r timeseries_plot}
+
+```r
 ggplot(timeseries, aes(interval, mean)) +
   geom_line() +
   labs(x = "Interval", y = "Average number of steps")
 ```
 
-Interval __`r maxinterval`__ contains the maximum number of steps on average across all days.
+![](PA1_template_files/figure-html/timeseries_plot-1.png)<!-- -->
+
+Interval __835__ contains the maximum number of steps on average across all days.
 
 ## Imputing missing values
 
-``` {r na_count}
+
+```r
 na_count<- sum(is.na(activity$steps))
 ```
-Total number of missing values in the dataset (NAs): __`r na_count`__
+Total number of missing values in the dataset (NAs): __2304__
 
-```{r imputation}
+
+```r
 activity_imputed <- activity %>%
   group_by(interval) %>%
   mutate(steps_imputed = ifelse(is.na(steps), mean(steps, na.rm = TRUE), steps))
 ```
 
-```{r summary2}
+
+```r
 dailysummary2 <- activity_imputed %>% 
   group_by(date) %>%
   summarise(total = sum(steps_imputed, na.rm = TRUE))
@@ -94,21 +128,29 @@ mediansteps2<- median(dailysummary2$total)
 
 Histogram of the total number of steps taken each day:
 
-```{r historgram2}
+
+```r
 ggplot(dailysummary2, aes(total)) +
   geom_histogram() +
   labs(x = "Total Daily Number of Steps", title = "Histogram of Daily Total Steps")
 ```
 
-Mean total number of steps taken each day: __`r format(meansteps2, scientific = FALSE)`__
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
 
-Median total number of steps taken each day: __`r format(mediansteps2, scientific = FALSE)`__
+![](PA1_template_files/figure-html/historgram2-1.png)<!-- -->
+
+Mean total number of steps taken each day: __10766.19__
+
+Median total number of steps taken each day: __10766.19__
 
 When imputing the missing data, the mean and median total number of steps each day are higher.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r weekday}
+
+```r
 timeseries2 <- activity_imputed %>%
   mutate(day = weekdays(as.Date(date))) %>%
   mutate(weekday = ifelse(day == "Saturday" | day == "Sunday", "Weekend", "Weekday")) %>%
@@ -116,10 +158,13 @@ timeseries2 <- activity_imputed %>%
   summarise(mean = mean(steps_imputed))
 ```
 
-``` {r timeseries_plot2}
+
+```r
 ggplot(timeseries2, aes(interval, mean), color = weekday) +
   geom_line() +
   labs(x = "Interval", y = "Average number of steps") +
   facet_grid(weekday~.)
 ```
+
+![](PA1_template_files/figure-html/timeseries_plot2-1.png)<!-- -->
 
